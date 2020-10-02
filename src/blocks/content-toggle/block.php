@@ -105,30 +105,38 @@ function ub_faq_questions($qna = ''){
         return $parsed_qna;
     }
     else{
-        $uniqueItems = json_encode(array_values(array_unique(json_decode('[' . $qna . ']'), SORT_REGULAR)), JSON_UNESCAPED_SLASHES);
+        $qna_array = json_decode('[' . $qna . ']');
 
-        $current_qna = substr($uniqueItems, 1, strlen($uniqueItems)-2) ;
-
-        if($parsed_qna != ''){
-            $current = json_decode('[' . $parsed_qna . ']');
-            $newItems = json_decode('[' . $qna . ']');
-            foreach($newItems as $item){
-                if(is_array($current) && in_array($item, $current)){
-                    $current_qna = str_replace(json_encode($item, JSON_UNESCAPED_SLASHES), 'false', $current_qna);
+        if(isset($qna_array)){
+            $uniqueItems = json_encode(array_values(array_unique( $qna_array , SORT_REGULAR)), JSON_UNESCAPED_SLASHES);
+            $current_qna = substr($uniqueItems, 1, strlen($uniqueItems)-2) ;
+    
+            if($parsed_qna != ''){
+                $current = json_decode('[' . $parsed_qna . ']');
+                $newItems = json_decode('[' . $qna . ']');
+                foreach($newItems as $item){
+                    if(is_array($current) && in_array($item, $current)){
+                        $current_qna = str_replace(json_encode($item, JSON_UNESCAPED_SLASHES), 'false', $current_qna);
+                    }
                 }
+                $currentItems = json_encode(array_values(
+                                    array_filter(
+                                        json_decode('['.$current_qna . ']')
+                                    )
+                                ), JSON_UNESCAPED_SLASHES);
+    
+                $current_qna = substr($currentItems, 1, strlen($currentItems)-2) ;
+                $parsed_qna .= ',' . PHP_EOL;
             }
-            $currentItems = json_encode(array_values(
-                                array_filter(
-                                    json_decode('['.$current_qna . ']')
-                                )
-                            ), JSON_UNESCAPED_SLASHES);
+            if($current_qna != ',' . PHP_EOL){
+                $parsed_qna .= $current_qna;
+            }
+        }
+        else{
+            echo json_last_error_msg();
+            var_dump($qna);
+        }
 
-            $current_qna = substr($currentItems, 1, strlen($currentItems)-2) ;
-            $parsed_qna .= ',' . PHP_EOL;
-        }
-        if($current_qna != ',' . PHP_EOL){
-            $parsed_qna .= $current_qna;
-        }
         return true;
     }
 }
